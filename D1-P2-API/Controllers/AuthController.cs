@@ -19,30 +19,46 @@ public class AuthController : ControllerBase
         _configuration = configuration;
     }
 
-    [HttpPost("login")]
-    public IActionResult Login([FromBody] LoginModel model)
-    {
-        // Add rate limiting
-        var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
-        if (string.IsNullOrEmpty(ipAddress))
-        {
-            return BadRequest("Invalid request");
-        }
+    //[HttpPost("login")]
+    //public IActionResult Login([FromBody] LoginModel model)
+    //{
+    //    // Add rate limiting
+    //    var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+    //    if (string.IsNullOrEmpty(ipAddress))
+    //    {
+    //        return BadRequest("Invalid request");
+    //    }
 
-        var user = _context.Users.FirstOrDefault(u => u.Email == model.Email);
+    //    var user = _context.Users.FirstOrDefault(u => u.Email == model.Email);
+    //    if (user == null)
+    //    {
+    //        Thread.Sleep(Random.Shared.Next(300, 700)); 
+    //        return Unauthorized(new { message = "Authentication failed" });
+    //    }
+
+    //    // TODO: Implement proper password hashing with salt
+    //    if (user.Password != model.Password)
+    //    {
+    //        Thread.Sleep(Random.Shared.Next(300, 700));
+    //        return Unauthorized(new { message = "Authentication failed" });
+    //    }
+
+    //    var token = GenerateJwtToken(user);
+    //    return Ok(new { token });
+    //}
+
+    [HttpPost("login")]
+    public IActionResult Login()
+    {
+        // Récupérer le premier utilisateur directement
+        var user = _context.Users.FirstOrDefault();
+
         if (user == null)
         {
-            Thread.Sleep(Random.Shared.Next(300, 700)); 
-            return Unauthorized(new { message = "Authentication failed" });
+            return Unauthorized(new { message = "No users found" });
         }
 
-        // TODO: Implement proper password hashing with salt
-        if (user.Password != model.Password)
-        {
-            Thread.Sleep(Random.Shared.Next(300, 700));
-            return Unauthorized(new { message = "Authentication failed" });
-        }
-
+        // Générer directement le JWT
         var token = GenerateJwtToken(user);
         return Ok(new { token });
     }
